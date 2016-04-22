@@ -20,3 +20,9 @@ Help on flags:
 ```
 
 Tested on Apache 2.2 and Apache 2.4.
+
+## Docker Image
+
+```bash
+docker run -it -p 9117:9117 --name apache_exporter --link YOUR_APACHE_DOCKER:apache -d mradamczyk/apache_exporter
+```
