@@ -32,6 +32,8 @@ type Exporter struct {
 
 	scrapeFailures prometheus.Counter
 	accessesTotal  prometheus.Counter
+	reqPerSec      prometheus.Gauge
+	cpuLoad        prometheus.Gauge
 	kBytesTotal    prometheus.Counter
 	uptime         prometheus.Counter
 	workers        *prometheus.GaugeVec
@@ -60,6 +62,16 @@ func NewExporter(uri string) *Exporter {
 			Name:      "uptime_seconds_total",
 			Help:      "Current uptime in seconds",
 		}),
+		reqPerSec: prometheus.NewGauge(prometheus.GaugeOpts{
+			Namespace: namespace,
+			Name:      "reqPerSec",
+			Help:      "Apache requests per second",
+		}),
+		cpuLoad: prometheus.NewGauge(prometheus.GaugeOpts{
+			Namespace: namespace,
+			Name:      "cpuLoad",
+			Help:      "Apache CPU Load",
+		}),
 		workers: prometheus.NewGaugeVec(prometheus.GaugeOpts{
 			Namespace: namespace,
 			Name:      "workers",
@@ -79,6 +91,8 @@ func (e *Exporter) Describe(ch chan<- *prometheus.Desc) {
 	e.scrapeFailures.Describe(ch)
 	e.accessesTotal.Describe(ch)
 	e.kBytesTotal.Describe(ch)
+	e.cpuLoad.Describe(ch)
+	e.reqPerSec.Describe(ch)
 	e.uptime.Describe(ch)
 	e.workers.Describe(ch)
 }
@@ -134,6 +148,12 @@ func (e *Exporter) collect(ch chan<- prometheus.Metric) error {
 		case key == "Total kBytes":
 			e.kBytesTotal.Set(val)
 			e.kBytesTotal.Collect(ch)
+		case key == "CPULoad":
+			e.cpuLoad.Set(val)
+			e.cpuLoad.Collect(ch)
+		case key == "ReqPerSec":
+			e.reqPerSec.Set(val)
+			e.reqPerSec.Collect(ch)
 		case key == "Uptime":
 			e.uptime.Set(val)
 			e.uptime.Collect(ch)
